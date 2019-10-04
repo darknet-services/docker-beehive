@@ -5,7 +5,7 @@ type: docker
 
 steps:
   - name: publish_elasticsearch
-      image: plugins/docker
+    image: plugins/docker
     privileged: true
     network_mode: host
     custom_dns: [8.8.8.8, 9.9.9.9]

@@ -237,18 +237,6 @@ for i in "$@"
     esac
   done
 
-# Validate command line arguments and load config
-# If a valid config file exists, set deployment type to "auto" and load the configuration
-if [ "$beehive_CONF_FILE" == "" ];
-  then
-    echo -e "Aborting. No configuration file given."
-    exit
-fi
-if [ -s "$beehive_CONF_FILE" ] && [ "$beehive_CONF_FILE" != "" ];
-  echo -e "Aborting. Config file \"$beehive_CONF_FILE\" not a beehive configuration file."
-  exit
-fi
-
 # Prepare running the installer
 echo -e "$INFO" | head -n 3
 CHECK_PORTS
@@ -264,18 +252,12 @@ export TERM=linux
 # Check if remote sites are available
 CHECKNET "$REMOTESITES"
 
-# Let' s load the iso config file if there is one
-if [ -f $CONF_FILE ];
-  then
-    source $CONF_FILE
-fi
-
 # Let's ask the user for install flavor
 if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
   then
     CONF_beehive_FLAVOR=$(dialog --keep-window --no-cancel --backtitle "$BACKTITLE" --title "[ Choose Your beehive NG Edition ]" --menu \
     "\nRequired: 6GB RAM, 128GB SSD\nRecommended: 8GB RAM, 256GB SSD" 14 70 6 \
-    "STANDARD" "Honeypots, ELK, NSM & Tools" \
+    "STANDARD" "Honeypots, ELK, NSM & Tools") 
 fi
 
 if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
@@ -409,8 +391,6 @@ for name in $(cat $beehiveCOMPOSE | grep -v '#' | grep image | cut -d'"' -f2 | u
 done
 wait
 }
-echo -e "${GREEN}✓${NULL}"  "Pull images"
-PULLIMAGES
 
 # Let's add the daily update check with a weekly clean interval
 echo -e "${GREEN}✓${NULL}"  "Modify checks"
@@ -510,6 +490,9 @@ rm -rf /etc/motd.d/cockpit && \
 rm -rf /etc/issue.net && \
 rm -rf /etc/motd && \
 systemctl restart console-setup.service
+
+echo -e "${GREEN}✓${NULL}"  "Pull images"
+PULLIMAGES
 
 if [ "$beehive_DEPLOYMENT_TYPE" == "auto" ];
   then

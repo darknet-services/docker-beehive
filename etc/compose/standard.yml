@@ -519,7 +519,7 @@ services:
     read_only: true
     volumes:
       - /data/nginx/cert/:/etc/nginx/cert/:ro
-      - /data/nginx/conf/nginxpasswd:/etc/nginx/nginxpasswd:ro
+      - /data/nginx/conf/nginxpasswd:/etc/nginx/conf/nginxpasswd/:ro
       - /data/nginx/log/:/var/log/nginx/
 
   # Spiderfoot service

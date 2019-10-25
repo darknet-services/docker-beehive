@@ -17,9 +17,9 @@ RUN sed -i 's/dl-cdn/dl-2/g' /etc/apk/repositories && \
     libzmq \
     nss \
     openjdk8-jre && \
-
+    git config --global http.postBuffer 5242880000 && \
     # Get and install packages
-    git clone --depth=1 https://github.com/dtag-dev-sec/listbot /etc/listbot && \
+    git clone --depth=1 git://github.com/dtag-dev-sec/listbot /etc/listbot && \
     cd /root/dist/ && \
     mkdir -p /usr/share/logstash/ && \
     aria2c -s 16 -x 16 https://artifacts.elastic.co/downloads/logstash/logstash-6.6.2.tar.gz && \

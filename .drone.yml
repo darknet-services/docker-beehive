@@ -416,7 +416,7 @@ steps:
     settings:
       auto_tag: true
       auto_tag_suffix: linux-amd64
-      dockerfile: docker/tanner/Dockerfile
+      dockerfile: docker/tanner/tanner/Dockerfile
       context: docker/tanner
       repo: beehivesec/tanner
       cache_from: beehivesec/tanner:linux-amd64

@@ -15,13 +15,10 @@ RUN apk -U --no-cache add \
     python \
     python-dev \
     py-pip \
-    py-setuptools && \
-    apk -U --no-cache add --repository http://mirror.clarkson.edu/alpine/edge/testing/
+    py-setuptools
 
-    # Setup user
 RUN addgroup -g 2000 rdpy && \
     adduser -S -s /bin/ash -u 2000 -D -g 2000 rdpy && \
-
     # Install deps 
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --upgrade cffi && \

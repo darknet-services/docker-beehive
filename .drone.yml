@@ -408,6 +408,7 @@ steps:
       event:
         - push
         - tag
+        
   - name: publish_tanner
     network_mode: host
     custom_dns: [8.8.8.8, 9.9.9.9]
@@ -417,7 +418,7 @@ steps:
       auto_tag: true
       auto_tag_suffix: linux-amd64
       dockerfile: docker/tanner/tanner/Dockerfile
-      context: docker/tanner
+      context: docker/tanner/tanner
       repo: beehivesec/tanner
       cache_from: beehivesec/tanner:linux-amd64
       username:

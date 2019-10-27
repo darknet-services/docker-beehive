@@ -474,6 +474,8 @@ services:
   ## Logstash service
   logstash:
     container_name: logstash
+    env_file:
+      - elk_environment
     restart: always
     image: "beehivesec/logstash:linux-amd64"
     volumes:

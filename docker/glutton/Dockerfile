@@ -1,4 +1,4 @@
-FROM alpine 
+FROM alpine:3.9
 
 RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/http\:\/\/mirror.clarkson.edu/g' /etc/apk/repositories
 
@@ -18,22 +18,21 @@ RUN apk -U --no-cache add \
 
     # Setup go, glutton
     export GOPATH=/opt/go/ && \
-    go get -d github.com/mushorg/glutton && \
-    cd /opt/go/src/github.com/satori/ && \
-    rm -rf go.uuid && \ 
-    git clone https://github.com/satori/go.uuid && \
-    cd go.uuid && \
-    git checkout v1.2.0 && \
-    mv /root/dist/system.go /opt/go/src/github.com/mushorg/glutton/ && \
-    cd /opt/go/src/github.com/mushorg/glutton/ && \
+        export GOPATH=/opt/go/ && \
+    export GO111MODULE=on && \
+    mkdir -p /opt/go && \
+    cd /opt/go/ && \
+    git clone https://github.com/mushorg/glutton && \
+    cd /opt/go/glutton/ && \
+    mv /root/dist/system.go /opt/go/glutton/ && \
+    go mod download && \
     make build && \
     cd / && \
     mkdir -p /opt/glutton && \
-    mv /opt/go/src/github.com/mushorg/glutton/bin /opt/glutton/ && \
-    mv /opt/go/src/github.com/mushorg/glutton/config /opt/glutton/ && \
-    mv /opt/go/src/github.com/mushorg/glutton/rules /opt/glutton/ && \
+    mv /opt/go/glutton/bin /opt/glutton/ && \
+    mv /opt/go/glutton/config /opt/glutton/ && \
+    mv /opt/go/glutton/rules /opt/glutton/ && \
     setcap cap_net_admin,cap_net_raw=+ep /opt/glutton/bin/server && \
-    setcap cap_net_admin,cap_net_raw=+ep /sbin/xtables-multi && \
 
     # Setup user, groups and configs
     addgroup -g 2000 glutton && \

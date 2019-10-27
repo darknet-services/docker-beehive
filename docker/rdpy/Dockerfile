@@ -25,7 +25,6 @@ RUN addgroup -g 2000 rdpy && \
     # Install deps 
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --upgrade cffi && \
-    pip install --no-cache-dir --upgrade pyqt && \
     pip install --no-cache-dir \
     hpfeeds \
     twisted \

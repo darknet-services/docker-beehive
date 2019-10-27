@@ -12,7 +12,7 @@ PROGRESSBOXCONF=" --backtitle "$BACKTITLE" --progressbox 24 80"
 
 SITES="https://hub.docker.com https://gitlab.com"
 
-beehiveCOMPOSE="/opt/beehive/etc/beehive.yml"
+beehiveCOMPOSE="/opt/beehive/etc/compose/standard.yml"
 
 LSB_STABLE_SUPPORTED="ubuntu"
 
@@ -161,28 +161,18 @@ function CHECKPACKAGES {
 
 # Check if remote sites are available
 function CHECKNET {
-  if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
-    then
+ 
       local SITES="$1"
       SITESCOUNT=$(echo -e $SITES | wc -w)
       j=0
       for i in $SITES;
         do
-          echo -e $(expr 100 \* $j / $SITESCOUNT) | dialog --title "[ Availability check ]" --backtitle "$BACKTITLE" --gauge "\n  Now checking: $i\n" 8 80
           curl --connect-timeout 30 -IsS $i 2>&1>/dev/null
           if [ $? -ne 0 ];
-            then
-              dialog --keep-window --backtitle "$BACKTITLE" --title "[ Continue? ]" --yesno "\nAvailability check failed. You can continue, but the installation might fail." 10 50
-              if [ $? = 1 ];
-                then
-                  dialog --keep-window --backtitle "$BACKTITLE" --title "[ Abort ]" --msgbox "\nInstallation aborted. Exiting the installer." 7 50
-                  exit
-                else
-                  break;
-              fi;
+            exit
+          else
+            break;
           fi;
-        let j+=1
-        echo -e $(expr 100 \* $j / $SITESCOUNT) | dialog --keep-window --title "[ Availability check ]" --backtitle "$BACKTITLE" --gauge "\n  Now checking: $i\n" 8 80
       done;
   fi
 }
@@ -200,8 +190,8 @@ if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
     echo -e "### We will take care of SSH (22), but other services i.e. FTP (21), TELNET (23), SMTP (25), HTTP (80), HTTPS (443), etc."
     echo -e "### might collide with beehive's honeypots and prevent beehive from starting successfully."
     echo -e
-    echo -e "Sleeping 20 second, then carrying on..."
-    sleep 20
+    echo -e "Sleeping 5 second, then carrying on..."
+    sleep 5
     echo -e "Ok lets do this!"
 fi
 }
@@ -212,30 +202,7 @@ fi
 GOT_ROOT
 CHECKPACKAGES "$PREINSTALLPACKAGES"
 
-#####################################
-# IV. Prepare installer environment #
-#####################################
 
-# Check for Debian release and extract command line arguments
-LSB=$(lsb_release -c | awk '{ print $2 }')
-if [ "$1" == "" ];
-  then
-    echo -e "$INFO"
-    exit
-fi
-for i in "$@"
-  do
-    case $i in
-      --conf=*)
-        beehive_CONF_FILE="${i#*=}"
-        shift
-      ;;
-      --type=user)
-        beehive_DEPLOYMENT_TYPE="${i#*=}"
-        shift
-      ;;
-    esac
-  done
 
 # Prepare running the installer
 echo -e "$INFO" | head -n 3
@@ -252,16 +219,7 @@ export TERM=linux
 # Check if remote sites are available
 CHECKNET "$REMOTESITES"
 
-# Let's ask the user for install flavor
-if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
-  then
-    CONF_beehive_FLAVOR=$(dialog --keep-window --no-cancel --backtitle "$BACKTITLE" --title "[ Choose Your beehive NG Edition ]" --menu \
-    "\nRequired: 6GB RAM, 128GB SSD\nRecommended: 8GB RAM, 256GB SSD" 14 70 6 \
-    "STANDARD" "Honeypots, ELK, NSM & Tools") 
-fi
 
-if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
-  then
     OK="1"
     CONF_WEB_USER="webuser"
     CONF_WEB_PW="pass1"
@@ -494,11 +452,8 @@ systemctl restart console-setup.service
 echo -e "${GREEN}✓${NULL}"  "Pull images"
 PULLIMAGES
 
-if [ "$beehive_DEPLOYMENT_TYPE" == "auto" ];
-  then
-    echo -e "Done. Please reboot."
-  else
-    echo -e "${GREEN}✓${NULL}"  "Rebooting ..."
-    sleep 2
-    reboot
-fi
+
+echo -e "${GREEN}✓${NULL}"  "Rebooting ..."
+sleep 2
+reboot
+

@@ -49,7 +49,6 @@ RUN cd /opt && \
     openssl-dev \
     python-dev \
     py-pip \
-    py-qt && \
     rm -rf /var/cache/apk/*
 
 # Start rdpy

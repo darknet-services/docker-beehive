@@ -161,7 +161,6 @@ function CHECKPACKAGES {
 
 # Check if remote sites are available
 function CHECKNET {
- 
       local SITES="$1"
       SITESCOUNT=$(echo -e $SITES | wc -w)
       j=0
@@ -448,6 +447,27 @@ rm -rf /etc/motd.d/cockpit && \
 rm -rf /etc/issue.net && \
 rm -rf /etc/motd && \
 systemctl restart console-setup.service
+
+
+echo -e "${GREEN}✓${NULL}"  "Webuser creds"
+mkdir -p /data/nginx/conf
+htpasswd -b -c /data/nginx/conf/nginxpasswd "$CONF_WEB_USER" "$CONF_WEB_PW"
+echo -e
+
+
+# Let's generate a SSL self-signed certificate without interaction (browsers will see it invalid anyway)
+
+echo -e "${GREEN}✓${NULL}"  "NGINX Certificate"
+mkdir -p /data/nginx/cert
+openssl req \
+        -nodes \
+        -x509 \
+        -sha512 \
+        -newkey rsa:8192 \
+        -keyout "/data/nginx/cert/nginx.key" \
+        -out "/data/nginx/cert/nginx.crt" \
+        -days 3650 \
+        -subj '/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd'
 
 echo -e "${GREEN}✓${NULL}"  "Pull images"
 PULLIMAGES

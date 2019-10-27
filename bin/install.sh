@@ -8,8 +8,6 @@ GREEN="\e[32m"
 NULL="\e[0m"
 BACKTITLE="beehive-Installer"
 
-CONF_FILE="/root/installer/iso.conf"
-
 PROGRESSBOXCONF=" --backtitle "$BACKTITLE" --progressbox 24 80"
 
 SITES="https://hub.docker.com https://gitlab.com"
@@ -163,7 +161,7 @@ function CHECKPACKAGES {
 
 # Check if remote sites are available
 function CHECKNET {
-  if [ "$beehive_DEPLOYMENT_TYPE" == "iso" ] || [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
+  if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
     then
       local SITES="$1"
       SITESCOUNT=$(echo -e $SITES | wc -w)
@@ -190,7 +188,7 @@ function CHECKNET {
 }
 
 # Check for other services
-function fuCHECK_PORTS {
+function CHECK_PORTS {
 if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
   then
     echo -e
@@ -236,51 +234,12 @@ for i in "$@"
         beehive_DEPLOYMENT_TYPE="${i#*=}"
         shift
       ;;
-      --type=auto)
-        beehive_DEPLOYMENT_TYPE="${i#*=}"
-        shift
-      ;;
-      --type=iso)
-        beehive_DEPLOYMENT_TYPE="${i#*=}"
-        shift
-      ;;
-      --help)
-        echo -e
-  exit
-      ;;
-      *)
-        echo -e "$INFO"
-  exit
-      ;;
     esac
   done
 
-# Validate command line arguments and load config
-# If a valid config file exists, set deployment type to "auto" and load the configuration
-if [ "$beehive_DEPLOYMENT_TYPE" == "auto" ] && [ "$beehive_CONF_FILE" == "" ];
-  then
-    echo -e "Aborting. No configuration file given."
-    exit
-fi
-if [ -s "$beehive_CONF_FILE" ] && [ "$beehive_CONF_FILE" != "" ];
-  then
-    beehive_DEPLOYMENT_TYPE="auto"
-    if [ "$(head -n 1 $beehive_CONF_FILE | grep -c "# beehive")" == "1" ];
-      then
-        source "$beehive_CONF_FILE"
-      else
-  echo -e "Aborting. Config file \"$beehive_CONF_FILE\" not a beehive configuration file."
-        exit
-      fi
-  elif ! [ -s "$beehive_CONF_FILE" ] && [ "$beehive_CONF_FILE" != "" ];
-    then
-      echo -e "Aborting. Config file \"$beehive_CONF_FILE\" not found."
-      exit
-fi
-
 # Prepare running the installer
 echo -e "$INFO" | head -n 3
-fuCHECK_PORTS
+CHECK_PORTS
 
 
 #######################################
@@ -290,44 +249,18 @@ fuCHECK_PORTS
 # Set TERM
 export TERM=linux
 
-# If this is a ISO installation we need to wait a few seconds to avoid interference with service messages
-if [ "$beehive_DEPLOYMENT_TYPE" == "iso" ];
-  then
-    sleep 5
-    dialog --keep-window --no-ok --no-cancel --backtitle "$BACKTITLE" --title "[ Wait to avoid interference with service messages ]" --pause "" 6 80 7
-fi
-
 # Check if remote sites are available
 CHECKNET "$REMOTESITES"
 
-# Let' s load the iso config file if there is one
-if [ -f $CONF_FILE ];
-  then
-    dialog --keep-window --backtitle "$BACKTITLE" --title "[ Found personalized iso.config ]" --msgbox "\nYour personalized settings will be applied!" 7 47
-    source $CONF_FILE
-  else
-    # dialog logic considers 1=false, 0=true
-    CONF_PROXY_USE="1"
-    CONF_PFX_USE="1"
-    CONF_NTP_USE="1"
-fi
-
 # Let's ask the user for install flavor
-if [ "$beehive_DEPLOYMENT_TYPE" == "iso" ] || [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
+if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
   then
     CONF_beehive_FLAVOR=$(dialog --keep-window --no-cancel --backtitle "$BACKTITLE" --title "[ Choose Your beehive NG Edition ]" --menu \
     "\nRequired: 6GB RAM, 128GB SSD\nRecommended: 8GB RAM, 256GB SSD" 14 70 6 \
-    "STANDARD" "Honeypots, ELK, NSM & Tools" \
-    "SENSOR" "Just Honeypots, EWS Poster & NSM" \
-    "INDUSTRIAL" "Conpot, RDPY, Vnclowpot, ELK, NSM & Tools" \
-    "COLLECTOR" "Heralding, ELK, NSM & Tools" \
-    "NEXTGEN" "NextGen (Glutton, HoneyPy)" 3>&1 1>&2 2>&3 3>&-)
+    "STANDARD" "Honeypots, ELK, NSM & Tools") 
 fi
 
-# Let's ask for web user credentials if deployment type is iso or user
-# In case of auto, credentials are created from config values
-# Skip this step entirely if SENSOR flavor
-if [ "$beehive_DEPLOYMENT_TYPE" == "iso" ] || [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
+if [ "$beehive_DEPLOYMENT_TYPE" == "user" ];
   then
     OK="1"
     CONF_WEB_USER="webuser"
@@ -408,52 +341,6 @@ apt-get -y purge exim4-base mailutils
 apt-get -y autoremove
 apt-mark hold exim4-base mailutils
 
-# If flavor is SENSOR do not write credentials
-if ! [ "$CONF_beehive_FLAVOR" == "SENSOR" ];
-  then
-    echo -e "${GREEN}✓${NULL}"  "Webuser creds"
-    mkdir -p /data/nginx/conf
-    htpasswd -b -c /data/nginx/conf/nginxpasswd "$CONF_WEB_USER" "$CONF_WEB_PW"
-    echo -e
-fi
-
-# Let's generate a SSL self-signed certificate without interaction (browsers will see it invalid anyway)
-if ! [ "$CONF_beehive_FLAVOR" == "SENSOR" ];
-then
-  echo -e "${GREEN}✓${NULL}"  "NGINX Certificate"
-  mkdir -p /data/nginx/cert
-  openssl req \
-          -nodes \
-          -x509 \
-          -sha512 \
-          -newkey rsa:8192 \
-          -keyout "/data/nginx/cert/nginx.key" \
-          -out "/data/nginx/cert/nginx.crt" \
-          -days 3650 \
-          -subj '/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd'
-fi
-
-# Let's setup the ntp server
-if [ "$CONF_NTP_USE" == "0" ];
-  then
-    echo -e "${GREEN}✓${NULL}"  "Setup NTP"
-    cp $CONF_NTP_CONF_FILE /etc/ntp.conf
-fi
-
-# Let's setup 802.1x networking
-if [ "CONF_PFX_USE" == "0" ];
-  then
-    echo -e "${GREEN}✓${NULL}"  "Setup 802.1x"
-    cp $CONF_PFX_FILE /etc/wpa_supplicant/
-    echo -e "$NETWORK_INTERFACES" | tee -a /etc/network/interfaces
-    echo -e "$NETWORK_WIRED8021x" | tee /etc/wpa_supplicant/wired8021x.conf
-    echo -e "$NETWORK_WLAN8021x" | tee /etc/wpa_supplicant/wireless8021x.conf
-fi
-
-# Let's provide a wireless example config ...
-echo -e "${GREEN}✓${NULL}"  "Example config"
-echo -e "$NETWORK_WLANEXAMPLE" | tee -a /etc/network/interfaces
-
 # Let's make sure SSH roaming is turned off (CVE-2016-0777, CVE-2016-0778)
 echo -e "${GREEN}✓${NULL}"  "SSH roaming off"
 echo -e "UseRoaming no" | tee -a /etc/ssh/ssh_config
@@ -504,8 +391,6 @@ for name in $(cat $beehiveCOMPOSE | grep -v '#' | grep image | cut -d'"' -f2 | u
 done
 wait
 }
-echo -e "${GREEN}✓${NULL}"  "Pull images"
-PULLIMAGES
 
 # Let's add the daily update check with a weekly clean interval
 echo -e "${GREEN}✓${NULL}"  "Modify checks"
@@ -605,6 +490,9 @@ rm -rf /etc/motd.d/cockpit && \
 rm -rf /etc/issue.net && \
 rm -rf /etc/motd && \
 systemctl restart console-setup.service
+
+echo -e "${GREEN}✓${NULL}"  "Pull images"
+PULLIMAGES
 
 if [ "$beehive_DEPLOYMENT_TYPE" == "auto" ];
   then

@@ -15,20 +15,14 @@ RUN apk -U --no-cache add \
                python \
                python-dev \
                sqlite && \
-
-# Install php sandbox from git
     git clone --depth=1 https://github.com/rep/hpfeeds /opt/hpfeeds && \
     cd /opt/hpfeeds/broker && \
     sed -i -e '87d;88d' database.py && \
     cp /root/dist/adduser.sql . && \
     cd /opt/hpfeeds/broker && timeout 5 python broker.py || : && \
-    sqlite3 db.sqlite3 < adduser.sql && \ 
-    
-    #python setup.py build && \
-    #python setup.py install && \
+    sqlite3 db.sqlite3 < adduser.sql
 
-# Clean up
-    apk del --purge autoconf \
+RUN apk del --purge autoconf \
                     build-base \
                     coreutils \
                     libffi-dev \
@@ -36,6 +30,5 @@ RUN apk -U --no-cache add \
     rm -rf /root/* && \
     rm -rf /var/cache/apk/*
 
-# Set workdir and start glastopf
 WORKDIR /opt/hpfeeds/broker
 CMD python broker.py

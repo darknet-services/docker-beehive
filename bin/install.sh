@@ -218,53 +218,52 @@ export TERM=linux
 CHECKNET "$REMOTESITES"
 
 
-    OK="1"
-    CONF_WEB_USER="webuser"
-    CONF_WEB_PW="pass1"
-    CONF_WEB_PW2="pass2"
-    SECURE="0"
-    while [ 1 != 2 ]
+OK="1"
+CONF_WEB_USER="webuser"
+CONF_WEB_PW="pass1"
+CONF_WEB_PW2="pass2"
+SECURE="0"
+while [ 1 != 2 ]
+  do
+    CONF_WEB_USER=$(dialog --keep-window --backtitle "$BACKTITLE" --title "[ Enter your web user name ]" --inputbox "\n" 9 50 3>&1 1>&2 2>&3 3>&-)
+    CONF_WEB_USER=$(echo -e $CONF_WEB_USER | tr -cd "[:alnum:]_.-")
+    dialog --keep-window --backtitle "$BACKTITLE" --title "[ Your username is ]" --yesno "\n$CONF_WEB_USER" 7 50
+    OK=$?
+  if [ "$OK" = "0" ] && [ "$CONF_WEB_USER" != "" ];
+    then
+      break
+  fi
+done
+while [ "$CONF_WEB_PW" != "$CONF_WEB_PW2"  ] && [ "$SECURE" == "0" ]
+  do
+    while [ "$CONF_WEB_PW" == "pass1"  ] || [ "$CONF_WEB_PW" == "" ]
       do
-        CONF_WEB_USER=$(dialog --keep-window --backtitle "$BACKTITLE" --title "[ Enter your web user name ]" --inputbox "\n" 9 50 3>&1 1>&2 2>&3 3>&-)
-        CONF_WEB_USER=$(echo -e $CONF_WEB_USER | tr -cd "[:alnum:]_.-")
-        dialog --keep-window --backtitle "$BACKTITLE" --title "[ Your username is ]" --yesno "\n$CONF_WEB_USER" 7 50
-        OK=$?
-      if [ "$OK" = "0" ] && [ "$CONF_WEB_USER" != "" ];
-        then
-          break
-      fi
-    done
-    while [ "$CONF_WEB_PW" != "$CONF_WEB_PW2"  ] && [ "$SECURE" == "0" ]
-      do
-        while [ "$CONF_WEB_PW" == "pass1"  ] || [ "$CONF_WEB_PW" == "" ]
-          do
-            CONF_WEB_PW=$(dialog --keep-window --insecure --backtitle "$BACKTITLE" \
-                            --title "[ Enter password for your web user ]" \
-                            --passwordbox "\nPassword" 9 60 3>&1 1>&2 2>&3 3>&-)
-          done
-        CONF_WEB_PW2=$(dialog --keep-window --insecure --backtitle "$BACKTITLE" \
-                        --title "[ Repeat password for your web user ]" \
+        CONF_WEB_PW=$(dialog --keep-window --insecure --backtitle "$BACKTITLE" \
+                        --title "[ Enter password for your web user ]" \
                         --passwordbox "\nPassword" 9 60 3>&1 1>&2 2>&3 3>&-)
-        if [ "$CONF_WEB_PW" != "$CONF_WEB_PW2" ];
+      done
+    CONF_WEB_PW2=$(dialog --keep-window --insecure --backtitle "$BACKTITLE" \
+                    --title "[ Repeat password for your web user ]" \
+                    --passwordbox "\nPassword" 9 60 3>&1 1>&2 2>&3 3>&-)
+    if [ "$CONF_WEB_PW" != "$CONF_WEB_PW2" ];
+      then
+        echo -e "${GREEN}✓${NULL}"  "Please re-enter your password ..."
+        CONF_WEB_PW="pass1"
+        CONF_WEB_PW2="pass2"
+    fi
+    SECURE=$(printf "%s" "$CONF_WEB_PW" | cracklib-check | grep -c "OK")
+    if [ "$SECURE" == "0" ] && [ "$CONF_WEB_PW" == "$CONF_WEB_PW2" ];
+      then
+        echo -e "${GREEN}✓${NULL}"  "Password is not secure ..."
+        OK=$?
+        if [ "$OK" == "1" ];
           then
-            dialog --keep-window --backtitle "$BACKTITLE" --title "[ Passwords do not match. ]" \
-                  --msgbox "\nPlease re-enter your password." 7 60
             CONF_WEB_PW="pass1"
             CONF_WEB_PW2="pass2"
         fi
-        SECURE=$(printf "%s" "$CONF_WEB_PW" | cracklib-check | grep -c "OK")
-        if [ "$SECURE" == "0" ] && [ "$CONF_WEB_PW" == "$CONF_WEB_PW2" ];
-          then
-            dialog --keep-window --backtitle "$BACKTITLE" --title "[ Password is not secure ]" --defaultno --yesno "\nKeep insecure password?" 7 50
-            OK=$?
-            if [ "$OK" == "1" ];
-              then
-                CONF_WEB_PW="pass1"
-                CONF_WEB_PW2="pass2"
-            fi
-        fi
-      done
-fi
+    fi
+  done
+
 
 dialog --clear
 

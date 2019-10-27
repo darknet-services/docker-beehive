@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/giantswarm/kubernetes-elastic-stack.svg?style=shield)]()
+[![Build Status](https://drone.blackhatch.io/api/badges/alessio/beehive/status.svg)](https://drone.blackhatch.io/alessio/beehive)
 
 # Honeypot stack in kubernetes
 

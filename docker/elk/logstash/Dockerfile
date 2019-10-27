@@ -12,6 +12,7 @@ RUN sed -i 's/dl-cdn/dl-2/g' /etc/apk/repositories && \
     aria2 \
     bash \
     curl \
+    gettext \
     git \
     libc6-compat \
     libzmq \

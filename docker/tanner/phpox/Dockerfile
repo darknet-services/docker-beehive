@@ -55,4 +55,4 @@ EXPOSE 0
 USER nobody
 
 WORKDIR /opt/phpox
-CMD ["python3.6", "sandbox.py"]
+CMD ["python3", "sandbox.py"]

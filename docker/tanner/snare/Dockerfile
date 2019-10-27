@@ -18,14 +18,12 @@ RUN apk -U --no-cache add \
     cd /opt/snare/ && \
     pip3 install --no-cache-dir --upgrade pip setuptools && \
     pip3 install --no-cache-dir -r requirements.txt && \
-    python3.6 setup.py install && \
+    python3 setup.py install && \
     cd / && \
-    rm -rf /opt/snare && \
-    clone --target http://example.com && \
-    mv /root/dist/pages/* /opt/snare/pages/ && \
+    rm -rf /opt/snare 
 
     # Clean up
-    apk del --purge \
+RUN apk del --purge \
     build-base \
     linux-headers \
     python3-dev && \

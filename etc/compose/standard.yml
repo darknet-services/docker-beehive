@@ -151,7 +151,7 @@ services:
     ports:
       - "22:22"
       - "23:23"
-    image: "beehivesec/cowrie"
+    image: "beehivesec/cowrie:linux-amd64"
     read_only: true
     volumes:
       - /data/cowrie/downloads:/home/cowrie/cowrie/dl

@@ -167,13 +167,12 @@ function CHECKNET {
       for i in $SITES;
         do
           curl --connect-timeout 30 -IsS $i 2>&1>/dev/null
-          if [ $? -ne 0 ];
+          if [ $? -ne 0 ];then
             exit
           else
-            break;
-          fi;
-      done;
-  fi
+              break
+          fi
+        done
 }
 
 # Check for other services

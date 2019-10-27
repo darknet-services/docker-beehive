@@ -1,40 +1,38 @@
 ### This is only for testing purposes, do NOT use for production
-FROM alpine 
-
-RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/http\:\/\/mirror.clarkson.edu/g' /etc/apk/repositories
+FROM alpine
 
 ADD dist/ /root/dist/
 
-RUN apk update
-
 # Install packages
 RUN apk -U --no-cache add \
-    build-base \
-    coreutils \
-    git \
-    libffi \
-    libffi-dev \
-    py-gevent \
-    py-pip \
-    python \
-    python-dev \
-    sqlite
+               build-base \
+               coreutils \
+               git \
+               libffi \
+               libffi-dev \
+               py-gevent \
+               py-pip \
+               python \
+               python-dev \
+               sqlite && \
 
-RUN pip install aiorun && \
-    # Install php sandbox from git
-    git clone https://github.com/rep/hpfeeds /opt/hpfeeds && \
-    cd /opt/hpfeeds/hpfeeds/scripts && python broker.py || : && \
+# Install php sandbox from git
+    git clone --depth=1 https://github.com/rep/hpfeeds /opt/hpfeeds && \
+    cd /opt/hpfeeds/broker && \
+    sed -i -e '87d;88d' database.py && \
     cp /root/dist/adduser.sql . && \
-    sqlite3 db.sqlite3 < adduser.sql
-#python setup.py build && \
-#python setup.py install && \
+    cd /opt/hpfeeds/broker && timeout 5 python broker.py || : && \
+    sqlite3 db.sqlite3 < adduser.sql && \ 
+    
+    #python setup.py build && \
+    #python setup.py install && \
 
 # Clean up
-RUN apk del --purge autoconf \
-    build-base \
-    coreutils \
-    libffi-dev \
-    python-dev && \
+    apk del --purge autoconf \
+                    build-base \
+                    coreutils \
+                    libffi-dev \
+                    python-dev && \
     rm -rf /root/* && \
     rm -rf /var/cache/apk/*
 

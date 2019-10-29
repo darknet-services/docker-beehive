@@ -18,7 +18,7 @@ RUN apk -U --no-cache add \
     git clone --depth=1 https://github.com/rep/hpfeeds /opt/hpfeeds && \
     cd /opt/hpfeeds/hpfeeds/broker && \
     sed -i -e '87d;88d' database.py && \
-    cd /opt/hpfeeds/hpfeeds/broker && timeout 5 python broker.py || : && \
+    cd /opt/hpfeeds/hpfeeds/broker && timeout 5 python server.py || : && \
     sqlite3 db.sqlite3 < /root/dist/adduser.sql
 
 RUN apk del --purge autoconf \
@@ -30,4 +30,4 @@ RUN apk del --purge autoconf \
     rm -rf /var/cache/apk/*
 
 WORKDIR /opt/hpfeeds/broker
-CMD python broker.py
+CMD python server.py

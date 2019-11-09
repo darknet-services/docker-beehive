@@ -42,8 +42,11 @@ RUN sed -i 's/dl-cdn/dl-2/g' /etc/apk/repositories && \
     echo "xpack.spaces.enabled: false" >> /usr/share/kibana/config/kibana.yml && \
     echo "xpack.apm.enabled: false" >> /usr/share/kibana/config/kibana.yml && \
     echo "xpack.uptime.enabled: false" >> /usr/share/kibana/config/kibana.yml && \
-    rm -rf /usr/share/kibana/optimize/bundles/* && \
-    /usr/share/kibana/bin/kibana --optimize && \
+    rm -rf /usr/share/kibana/optimize/bundles/*
+
+ADD dist/ui_app.pug /usr/share/kibana/src/ui/ui_render/views/ui_app.pug 
+
+RUN    /usr/share/kibana/bin/kibana --optimize && \
     addgroup -g 2000 kibana && \
     adduser -S -H -s /bin/ash -u 2000 -D -g 2000 kibana && \
     chown -R kibana:kibana /usr/share/kibana/ && \

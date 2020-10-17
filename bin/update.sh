@@ -41,6 +41,7 @@ function stop_beehive () {
 echo "### Need to stop beehive ..."
 echo -n "###### $BLUE Now stopping beehive.$WHITE "
 systemctl stop beehive
+for i in $(docker network ls | awk {'print $1'}); do docker network rm $i;done
 
 # Let's load docker images in parallel
 function dockerpull {
@@ -119,16 +120,6 @@ chmod 644 -R /data/nginx/cert
 echo "### Now pulling latest docker images"
 echo "######$BLUE This might take a while, please be patient!$WHITE"
 dockerpull 2>&1>/dev/null
-
-# Only run with command switch
-if [ "$1" != "-y" ]; then
-  echo "This script will update / upgrade all beehive related scripts, tools and packages to the latest versions."
-  echo "A backup of /opt/beehive will be written to /root. If you are unsure, you should save your work."
-  echo "This is a beta feature and only recommended for experienced users."
-  echo "If you understand the involved risks feel free to run this script with the '-y' switch."
-  echo
-  exit
-fi
 
 fuCHECK_VERSION
 fuCONFIGCHECK

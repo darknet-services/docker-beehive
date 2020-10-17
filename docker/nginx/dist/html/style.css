@@ -1,17 +1,83 @@
 .btn {
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0px;
-  font-family: Arial;
-  color: #ffffff;
-  font-size: 12px;
-  background: black;
-  padding: 2px 30px 2px 30px;
-  text-decoration: none;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0px;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 12px;
+    background: black;
+    padding: 2px 30px 2px 30px;
+    text-decoration: none;
 }
 
 .btn:hover {
-  background: rgb(49, 145, 49);
-  text-decoration: none;
+    background: rgb(49, 145, 49);
+    text-decoration: none;
 }
 
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+body {
+    margin: 0;
+    font-family: Roboto, sans-serif;
+    background-color: transparent;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 180px;
+    background-color: #202124;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+}
+
+li a {
+    display: block;
+    color: white;
+    padding: 15px 16px;
+    text-decoration: none;
+}
+
+li a.active {
+    background-color: #282C2F;
+    color: white;
+}
+
+li a:hover:not(.active) {
+    background-color: #323639;
+    color: white;
+}
+
+.nav-logo {
+    color: white;
+    text-transform: uppercase;
+    font-size: 20px;
+    text-align: center;
+    padding: 8px;
+}
+
+#logo-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 992px) {
+    #nav-desc {
+        display: none;
+    }
+    .logo-desktop {
+        display: none;
+    }
+    #logo-mobile {
+        display: block;
+        color: white;
+        text-transform: uppercase;
+        font-size: 20px;
+        text-align: center;
+        padding: 8px;
+    }
+    li a i {
+        font-family: 20px;
+    }
+}

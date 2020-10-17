@@ -15,11 +15,8 @@ ExecStartPre=-/opt/beehive/bin/updateip.sh
 ExecStartPre=-/bin/bash -c '/opt/beehive/bin/clean.sh on'
 
 # Remove old containers, images and volumes
-ExecStartPre=-/usr/bin/docker-compose -f /opt/beehive/etc/beehive.yml down -v
-ExecStartPre=-/usr/bin/docker-compose -f /opt/beehive/etc/beehive.yml rm -v
-ExecStartPre=-/bin/bash -c 'docker network rm $(docker network ls -q)'
-ExecStartPre=-/bin/bash -c 'docker volume rm $(docker volume ls -q)'
-ExecStartPre=-/bin/bash -c 'docker rm -v $(docker ps -aq)'
+ExecStartPre=-/usr/bin/docker-compose -f /opt/beehive/etc/compose/beehive.yml down -v
+ExecStartPre=-/usr/bin/docker-compose -f /opt/beehive/etc/compose/beehive.yml rm -v
 ExecStartPre=-/bin/bash -c 'docker rmi $(docker images | grep "<none>" | awk \'{print $3}\')'
 
 # Get IF, disable offloading, enable promiscious mode for p0f and suricata
@@ -32,12 +29,12 @@ ExecStartPre=-/bin/chmod 666 /var/run/docker.sock
 
 # Set iptables accept rules to avoid forwarding to honeytrap / NFQUEUE
 # Forward all other connections to honeytrap / NFQUEUE
-ExecStartPre=/opt/beehive/bin/rules.sh /opt/beehive/etc/beehive.yml set
+ExecStartPre=/opt/beehive/bin/rules.sh /opt/beehive/etc/compose/beehive.yml set
 
-# Compose T-Pot up
-ExecStart=/usr/bin/docker-compose -f /opt/beehive/etc/beehive.yml up --no-color
+# Compose up
+ExecStart=/usr/bin/docker-compose -f /opt/beehive/etc/compose/beehive.yml up --no-color
 
-# Compose T-Pot down, remove containers and volumes
+# Compose down, remove containers and volumes
 ExecStop=/usr/bin/docker-compose -f /opt/beehive/etc/beehive.yml down -v
 
 # Remove only previously set iptables rules

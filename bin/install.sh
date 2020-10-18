@@ -296,7 +296,7 @@ apt-get -y purge exim4-base mailutils
 apt-get -y autoremove
 apt-mark hold exim4-base mailutils
 
-# Let's make sure SSH roaming is turned off (CVE-2016-0777, CVE-2016-0778)
+# Lets make sure SSH roaming is turned off (CVE-2016-0777, CVE-2016-0778)
 echo -e "${GREEN}✓${NULL}"  "SSH roaming off"
 echo -e "UseRoaming no" | tee -a /etc/ssh/ssh_config
 
@@ -307,12 +307,11 @@ pip install --upgrade pip
 hash -r
 pip install elasticsearch-curator yq
 
-# Let's create the beehive user
 echo -e "${GREEN}✓${NULL}"  "Create user"
 addgroup --gid 2000 beehive
 adduser --system --no-create-home --uid 2000 --disabled-password --disabled-login --gid 2000 beehive
 
-# Let's set the hostname
+# Lets set the hostname
 a=$(RANDOMWORD /opt/beehive/host/usr/share/dict/a.txt)
 n=$(RANDOMWORD /opt/beehive/host/usr/share/dict/n.txt)
 HOST=$a$n
@@ -320,7 +319,7 @@ echo -e "${GREEN}✓${NULL}"  "Set hostname"
 hostnamectl set-hostname $HOST
 sed -i 's#127.0.1.1.*#127.0.1.1\t'"$HOST"'#g' /etc/hosts
 
-# Let's patch cockpit.socket, sshd_config
+# Lets patch cockpit.socket, sshd_config
 echo -e "${GREEN}✓${NULL}"  "Adjust ports"
 mkdir -p /etc/systemd/system/cockpit.socket.d
 echo -e "$COCKPIT_SOCKET" | tee /etc/systemd/system/cockpit.socket.d/listen.conf
@@ -330,7 +329,7 @@ echo -e "$SSHPORT" | tee -a /etc/ssh/sshd_config
 # Do not allow root login for cockpit
 sed -i '2i\auth requisite pam_succeed_if.so uid >= 1000' /etc/pam.d/cockpit
 
-# Let's make sure only CONF_beehive_FLAVOR images will be downloaded and started
+# Lets make sure only CONF_beehive_FLAVOR images will be downloaded and started
 case $CONF_beehive_FLAVOR in
   STANDARD)
     echo -e "${GREEN}✓${NULL}"  "STANDARD"
@@ -338,24 +337,23 @@ case $CONF_beehive_FLAVOR in
   ;;
 esac
 
-# Let's load docker images in parallel
+# Lets load docker images in parallel
 function PULLIMAGES {
 for name in $(cat $beehiveCOMPOSE | grep -v '#' | grep image | cut -d'"' -f2 | uniq)
   do
     docker pull $name &
 done
-wait
 }
 
-# Let's add the daily update check with a weekly clean interval
+# Lets add the daily update check with a weekly clean interval
 echo -e "${GREEN}✓${NULL}"  "Modify checks"
 echo -e "$UPDATECHECK" | tee /etc/apt-get/apt-get.conf.d/10periodic
 
-# Let's make sure to reboot the system after a kernel panic
+# Lets make sure to reboot the system after a kernel panic
 echo -e "${GREEN}✓${NULL}"  "Tweak sysctl"
 echo -e "$SYSCTLCONF" | tee -a /etc/sysctl.conf
 
-# Let's setup fail2ban config
+# Lets setup fail2ban config
 echo -e "${GREEN}✓${NULL}"  "Setup fail2ban"
 echo -e "$FAIL2BANCONF" | tee /etc/fail2ban/jail.d/beehive.conf
 
@@ -363,11 +361,11 @@ echo -e "$FAIL2BANCONF" | tee /etc/fail2ban/jail.d/beehive.conf
 echo -e "${GREEN}✓${NULL}"  "Systemd fix"
 echo -e "$SYSTEMDFIX" | tee /etc/systemd/network/99-default.link
 
-# Let's add some cronjobs
+# Lets add some cronjobs
 echo -e "${GREEN}✓${NULL}"  "Add cronjobs"
 echo -e "$CRONJOBS" | tee -a /etc/crontab
 
-# Let's create some files and folders
+# Lets create some files and folders
 echo -e "${GREEN}✓${NULL}"  "Files & folders"
 mkdir -p /data/adbhoney/downloads /data/adbhoney/log \
         /data/ciscoasa/log \
@@ -394,26 +392,26 @@ mkdir -p /data/adbhoney/downloads /data/adbhoney/log \
 touch /data/spiderfoot/spiderfoot.db
 touch /data/nginx/log/error.log
 
-# Let's copy some files
+# Lets copy some files
 echo -e "${GREEN}✓${NULL}"  "Copy configs"
 tar xvfz /opt/beehive/etc/objects/elkbase.tgz -C /
 cp /opt/beehive/host/etc/systemd/* /etc/systemd/system/
 systemctl enable beehive
 
-# Let's take care of some files and permissions
+# Lets take care of some files and permissions
 echo -e "${GREEN}✓${NULL}"  "Permissions"
 chmod 760 -R /data
 chown beehive:beehive -R /data
 chmod 644 -R /data/nginx/conf
 chmod 644 -R /data/nginx/cert
 
-# Let's replace "quiet splash" options, set a console font for more screen canvas and update grub
+# Lets replace "quiet splash" options, set a console font for more screen canvas and update grub
 echo -e "${GREEN}✓${NULL}"  "Options"
 sed -i 's#GRUB_CMDLINE_LINUX_DEFAULT="quiet"#GRUB_CMDLINE_LINUX_DEFAULT="quiet consoleblank=0"#' /etc/default/grub
 sed -i 's#GRUB_CMDLINE_LINUX=""#GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"#' /etc/default/grub
 update-grub
 
-# Let's enable a color prompt and add /opt/beehive/bin to path
+# Lets enable a color prompt and add /opt/beehive/bin to path
 echo -e "${GREEN}✓${NULL}"  "Setup prompt"
 tee -a /root/.bashrc <<EOF
 $ROOTPROMPT
@@ -428,11 +426,11 @@ PATH="$PATH:/opt/beehive/bin"
 EOF
 done
 
-# Let's create ews.ip before reboot and prevent race condition for first start
+# Lets create ews.ip before reboot and prevent race condition for first start
 echo -e "${GREEN}✓${NULL}"  "Update IP"
 /opt/beehive/bin/updateip.sh
 
-# Let's clean up apt-get
+# Lets clean up apt-get
 echo -e "${GREEN}✓${NULL}"  "Clean up"
 apt-get autoclean -y
 apt-get autoremove -y
@@ -453,7 +451,7 @@ htpasswd -b -c /data/nginx/conf/nginxpasswd "$CONF_WEB_USER" "$CONF_WEB_PW"
 echo -e
 
 
-# Let's generate a SSL self-signed certificate without interaction (browsers will see it invalid anyway)
+# Lets generate a SSL self-signed certificate without interaction (browsers will see it invalid anyway)
 
 echo -e "${GREEN}✓${NULL}"  "NGINX Certificate"
 mkdir -p /data/nginx/cert
@@ -473,5 +471,4 @@ PULLIMAGES
 
 echo -e "${GREEN}✓${NULL}"  "Rebooting ..."
 sleep 2
-reboot
 

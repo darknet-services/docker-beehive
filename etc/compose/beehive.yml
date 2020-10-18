@@ -315,14 +315,14 @@ services:
     read_only: true
 
   ## PHP Sandbox service
-  tanner_phpox:
-    container_name: tanner_phpox
-    restart: always
-    tty: true
-    networks:
-      - tanner_local
-    image: "beehivesec/phpox:linux-amd64"
-    read_only: true
+  #tanner_phpox:
+  #  container_name: tanner_phpox
+  #  restart: always
+  #  tty: true
+  #  networks:
+  #    - tanner_local
+  #  image: "beehivesec/phpox:linux-amd64"
+  #  read_only: true
 
   ## Tanner API Service
   tanner_api:
@@ -376,7 +376,6 @@ services:
     depends_on:
       - tanner_api
       - tanner_web
-      - tanner_phpox
 
   ## Snare Service
   snare:

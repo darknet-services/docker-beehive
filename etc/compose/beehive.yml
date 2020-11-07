@@ -467,7 +467,7 @@ services:
     depends_on:
       - elasticsearch
     ports:
-      - "127.0.0.1:64296:5601"
+      - "64296:5601"
     image: "beehivesec/kibana:linux-amd64"
 
   ## Logstash service
@@ -517,7 +517,7 @@ services:
     ports:
       - "64297:64297"
     image: "beehivesec/nginx:linux-amd64"
-    read_only: true
+    read_only: false 
     volumes:
       - /data/nginx/cert/:/etc/nginx/cert/:ro
       - /data/nginx/conf/nginxpasswd:/etc/nginx/conf/nginxpasswd/:ro

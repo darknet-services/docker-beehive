@@ -4,8 +4,7 @@ FROM node:10.15.2-alpine
 ADD dist/ /root/dist/
 #
 # Setup env and apt
-RUN sed -i 's/dl-cdn/dl-2/g' /etc/apk/repositories && \
-    apk -U --no-cache add \
+RUN apk -U --no-cache add \
     aria2 \
     curl && \
     #
@@ -28,7 +27,7 @@ RUN sed -i 's/dl-cdn/dl-2/g' /etc/apk/repositories && \
     cp elk.ico /usr/share/kibana/src/ui/public/assets/favicons/favicon-32x32.png && \
     #
     # Setup user, groups and configs
-    sed -i 's/#server.basePath: ""/server.basePath: "\/kibana"/' /usr/share/kibana/config/kibana.yml && \
+    sed -i 's/#server.basePath: "/" server.basePath: "\/kibana"/' /usr/share/kibana/config/kibana.yml && \
     sed -i 's/#kibana.defaultAppId: "home"/kibana.defaultAppId: "dashboards"/' /usr/share/kibana/config/kibana.yml && \
     sed -i 's/#server.host: "localhost"/server.host: "0.0.0.0"/' /usr/share/kibana/config/kibana.yml && \
     sed -i 's/#elasticsearch.hosts: \["http:\/\/localhost:9200"\]/elasticsearch.hosts: \["http:\/\/elasticsearch:9200"\]/' /usr/share/kibana/config/kibana.yml && \
